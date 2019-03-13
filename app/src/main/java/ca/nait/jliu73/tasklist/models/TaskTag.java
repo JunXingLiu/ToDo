@@ -6,12 +6,11 @@ package ca.nait.jliu73.tasklist.models;
 
 public class TaskTag
 {
-    private String id;
+    private long id;
     private String title;
 
-    public TaskTag(String id, String title)
+    public TaskTag(String title)
     {
-        this.id = id;
         this.title = title;
     }
 
@@ -20,12 +19,12 @@ public class TaskTag
 
     }
 
-    public String getId()
+    public long getId()
     {
         return id;
     }
 
-    public void setId(String id)
+    public void setId(long id)
     {
         this.id = id;
     }

@@ -8,19 +8,16 @@ import java.util.Date;
 
 public class TaskItem
 {
-    private String id;
+    private long id;
     private String title;
     private String description;
     private Date date;
     private boolean completed;
 
-    public TaskItem(String id, String title, String description, Date date, boolean completed)
+    public TaskItem(String title, String description)
     {
-        this.id = id;
         this.title = title;
         this.description = description;
-        this.date = date;
-        this.completed = completed;
     }
 
     public TaskItem()
@@ -28,11 +25,11 @@ public class TaskItem
 
     }
 
-    public String getId() {
+    public long getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(long id) {
         this.id = id;
     }
 

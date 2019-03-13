@@ -16,26 +16,30 @@ public class DBManager extends SQLiteOpenHelper
     static final String DB_Name = "task.db";
     static final int DB_Version = 1;
 
-    static final String taskItem = "TaskItem";
-    static final String id = BaseColumns._ID;
-    static final String title = "Title";
-    static final String description = "Description";
-    static final String date = "Date";
-    static final String completed = "Completed";
+    public static final String taskItem = "TaskItem";
+    public static final String id = BaseColumns._ID;
+    public static final String title = "Title";
+    public static final String description = "Description";
+    public static final String date = "Date";
+    public static final String completed = "Completed";
 
-    static final String taskTag = "TaskTag";
-    static final String headerId = BaseColumns._ID;
-    static final String headerTitle = "Title";
+    public static final String taskTag = "TaskTag";
+    public static final String headerId = BaseColumns._ID;
+    public static final String headerTitle = "Title";
 
-    static final String Create_Header = "CREATE TABLE " + taskTag
-            + "(" + headerId + " INTEGER PRIMARY KEY," + headerTitle + " TEXT" + ")";
+    static final String Create_Header = "CREATE TABLE " + taskTag + "("
+                                        + headerId + " INTEGER PRIMARY KEY AUTOINCREMENT, "
+                                        + headerTitle + " TEXT "
+                                        + ");";
 
-    static final String Create_Detail = String.format("CREATE TABLE %s(" +
-            "%s INTEGER PRIMARY KEY, " +
-            "%s TEXT REFERENCES %s(%s), " +
-            "%s TEXT, " +
-            "%s TEXT," +
-            "%s INTEGER)", taskItem, id, title, taskTag, headerTitle, description, date, completed);
+    static final String Create_Detail = "Create Table " + taskItem + "("
+                                        + id + " Integer Primary Key AUTOINCREMENT, "
+                                        + title + " Text, "
+                                        + description + " Text, "
+                                        + date  + " Text, "
+                                        + completed + " Integer "
+                                        + ");";
+
 
 
     public DBManager(Context context)
@@ -47,8 +51,9 @@ public class DBManager extends SQLiteOpenHelper
     @Override
     public void onCreate(SQLiteDatabase db)
     {
-        db.execSQL(Create_Header);
 
+        db.execSQL(Create_Header);
+        db.execSQL(Create_Detail);
         Log.d(TAG, "HERE");
     }
 
