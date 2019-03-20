@@ -65,22 +65,22 @@ public class TaskTagDAO
 
     }
 
-    public void deleteTask(TaskTag taskTag) throws Exception
+    public void deleteTask(TaskTag taskTag)
     {
-        String title = taskTag.getTitle();
-        long headerId = taskTag.getId();
+            String title = taskTag.getTitle();
+            long headerId = taskTag.getId();
 
-        TaskItemDAO taskItemDAO = new TaskItemDAO(context);
-        List<TaskItem> listOfTaskItems = taskItemDAO.getTaskItemOfTag(title);
-        if(listOfTaskItems != null && !listOfTaskItems.isEmpty())
-        {
-            for(TaskItem item : listOfTaskItems)
+            TaskItemDAO taskItemDAO = new TaskItemDAO(context);
+            List<TaskItem> listOfTaskItems = taskItemDAO.getTaskItemOfTag(title);
+            if(listOfTaskItems != null && !listOfTaskItems.isEmpty())
             {
-                taskItemDAO.deleteTaskItem(item);
+                for(TaskItem item : listOfTaskItems)
+                {
+                    taskItemDAO.deleteTaskItem(item);
+                }
             }
-        }
 
-        db.delete(DBManager.taskTag, DBManager.headerId + " = " + headerId, null);
+            db.delete(DBManager.taskTag, DBManager.headerId + " = " + headerId, null);
     }
 
     public List<TaskTag> getAllTag()

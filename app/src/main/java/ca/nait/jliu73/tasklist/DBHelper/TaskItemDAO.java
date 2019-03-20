@@ -59,9 +59,9 @@ public class TaskItemDAO
         manager.close();
     }
 
-    public TaskItem createTaskItem(String title, String description) throws Exception
+    public TaskItem createTaskItem(String title, String description)
     {
-        DateFormat dateFormat = new SimpleDateFormat("dd/mm/yyyy");
+        DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
         Date currentTime =  Calendar.getInstance().getTime();
         String strDate = dateFormat.format(currentTime);
         ContentValues values = new ContentValues();
@@ -74,7 +74,12 @@ public class TaskItemDAO
 
         Cursor cursor = db.query(DBManager.taskItem, allCol, DBManager.id + " = " + insertId, null, null, null, null);
         cursor.moveToFirst();
-        TaskItem newTaskItem = cursorToTaskItem(cursor);
+        TaskItem newTaskItem = null;
+        try {
+            newTaskItem = cursorToTaskItem(cursor);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         cursor.close();
         return  newTaskItem;
 
@@ -86,16 +91,47 @@ public class TaskItemDAO
         db.delete(DBManager.taskItem, DBManager.id + " = " + id, null);
     }
 
-    public List<TaskItem> getTaskItemOfTag(String title) throws Exception
+
+    public void deleteTaskItemById(long id)
+    {
+        db.delete(DBManager.taskItem, DBManager.id + " = " + id, null);
+    }
+
+    public TaskItem getTaskItemById(long id)
+    {
+        TaskItem taskItem = null;
+        Cursor cursor = db.query(DBManager.taskItem, allCol, DBManager.id + " = " + id, null, null, null, null);
+        try {
+            cursor.moveToFirst();
+            taskItem = cursorToTaskItem(cursor);
+        } catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+        return  taskItem;
+    }
+
+    public List<TaskItem> getTaskItemOfTag(String title)
     {
         List<TaskItem> listTaskItems = new ArrayList<TaskItem>();
 
-        Cursor cursor = db.query(DBManager.taskItem, allCol, DBManager.title + " = " + title, null, null, null, null);
+
+        Cursor cursor = null;
+        try {
+            cursor = db.query(DBManager.taskItem, allCol, DBManager.title + " = ?", new String[] { String.valueOf(title)}, null, null, null);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
         cursor.moveToFirst();
         while (!cursor.isAfterLast())
         {
-            TaskItem taskItem = cursorToTaskItem(cursor);
+            TaskItem taskItem = null;
+            try {
+                taskItem = cursorToTaskItem(cursor);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
             listTaskItems.add(taskItem);
             cursor.moveToNext();
         }
@@ -106,15 +142,20 @@ public class TaskItemDAO
 
     private TaskItem cursorToTaskItem(Cursor cursor) throws Exception
     {
-        Date date = new SimpleDateFormat("dd/mm/yyyy").parse(cursor.getString(3));
-
         TaskItem taskItem = new TaskItem();
         taskItem.setId(cursor.getLong(0));
         taskItem.setTitle(cursor.getString(1));
         taskItem.setDescription(cursor.getString(2));
-        taskItem.setDate(date);
-        taskItem.setCompleted(cursor.getInt(4) > 0 ? true : false);
+        taskItem.setDate(cursor.getString(3));
+        taskItem.setCompleted(cursor.getInt(4) > 0);
 
         return taskItem;
+    }
+
+    public void updateItemComplete(long id)
+    {
+        ContentValues values = new ContentValues();
+        values.put(DBManager.completed, 1);
+        db.update(DBManager.taskItem, values, "_id=" + id, null);
     }
 }

@@ -1,6 +1,7 @@
 package ca.nait.jliu73.tasklist.DBHelper;
 
 import android.content.Context;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.provider.BaseColumns;
@@ -12,6 +13,7 @@ import android.util.Log;
 
 public class DBManager extends SQLiteOpenHelper
 {
+
     static final String TAG = "DBManager";
     static final String DB_Name = "task.db";
     static final int DB_Version = 1;
@@ -64,6 +66,20 @@ public class DBManager extends SQLiteOpenHelper
         db.execSQL("DROP TABLE IF EXISTS " + taskTag);
 
         onCreate(db);
-
     }
+
+    public Cursor fetchGroup()
+    {
+        SQLiteDatabase db = this.getReadableDatabase();
+        String query = "SELECT * FROM " + taskTag;
+        return db.rawQuery(query, null);
+    }
+
+    public Cursor fetchChildren(String title)
+    {
+        SQLiteDatabase db = this.getReadableDatabase();
+        String query = "SELECT * FROM TaskItem WHERE Title = '" + title + "'";
+        return  db.rawQuery(query, null);
+    }
+
 }

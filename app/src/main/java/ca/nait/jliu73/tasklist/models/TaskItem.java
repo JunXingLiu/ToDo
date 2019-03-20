@@ -1,5 +1,8 @@
 package ca.nait.jliu73.tasklist.models;
 
+import android.provider.SyncStateContract;
+
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 /**
@@ -11,13 +14,18 @@ public class TaskItem
     private long id;
     private String title;
     private String description;
-    private Date date;
+    private String date;
     private boolean completed;
 
-    public TaskItem(String title, String description)
+    public TaskItem(String title, String description) throws Exception
     {
+
         this.title = title;
         this.description = description;
+        this.date = "\"01/01/1991\"";
+        this.completed = false;
+
+
     }
 
     public TaskItem()
@@ -49,11 +57,11 @@ public class TaskItem
         this.description = description;
     }
 
-    public Date getDate() {
+    public String getDate() {
         return date;
     }
 
-    public void setDate(Date date) {
+    public void setDate(String date) {
         this.date = date;
     }
 
