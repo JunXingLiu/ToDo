@@ -9,13 +9,15 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:padding="10dp"
-        android:gravity="center"/>
+        android:gravity="center"
+        android:textSize="@dimen/font_size"/>
 
     <TextView
         android:id="@+id/tv_child_complete"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:padding="10dp"
+        android:textSize="15sp"
         android:visibility="gone"/>
 
 </RelativeLayout>

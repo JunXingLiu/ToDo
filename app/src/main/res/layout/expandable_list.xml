@@ -22,9 +22,10 @@
             android:layout_height="wrap_content"
             android:layout_margin="16dp"
             android:clickable="true"
-            android:src="@drawable/archive"
+            android:src="@drawable/plus"
             android:visibility="gone"
-            app:backgroundTint="@android:color/holo_orange_dark" />
+            app:backgroundTint="@android:color/holo_orange_dark"
+            android:textSize="@dimen/font_size"/>
 
         <android.support.design.widget.FloatingActionButton
             android:id="@+id/fab"
@@ -33,7 +34,8 @@
             android:layout_gravity="bottom|end"
             android:layout_margin="16dp"
             android:clickable="true"
-            android:src="@drawable/plus" />
+            android:src="@drawable/plus"
+            android:textSize="@dimen/font_size"/>
 
 
     </LinearLayout>

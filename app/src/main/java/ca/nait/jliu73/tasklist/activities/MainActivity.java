@@ -1,5 +1,6 @@
 package ca.nait.jliu73.tasklist.activities;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.database.Cursor;
@@ -20,6 +21,17 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 
+import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.message.BasicNameValuePair;
+
+import java.util.ArrayList;
+import java.util.List;
+
 import ca.nait.jliu73.tasklist.DBHelper.DBManager;
 import ca.nait.jliu73.tasklist.DBHelper.TaskItemDAO;
 import ca.nait.jliu73.tasklist.DBHelper.TaskTagDAO;
@@ -29,6 +41,8 @@ import ca.nait.jliu73.tasklist.InputDialog;
 import ca.nait.jliu73.tasklist.R;
 import ca.nait.jliu73.tasklist.models.TaskItem;
 
+import static android.R.id.message;
+
 public class MainActivity extends AppCompatActivity implements InputDialog.InputDialogListener
 {
     private FloatingActionButton fab;
@@ -37,10 +51,12 @@ public class MainActivity extends AppCompatActivity implements InputDialog.Input
     private TaskItemDAO itemDAO;
     private int lastPosition = -1;
     private FloatingActionButton add_fab;
-    SQLiteDatabase db;
-    String groupTag = null;
+    private SQLiteDatabase db;
+    private String groupTag = null;
     private ExpandableListAdapter adapter;
     private View childView;
+    private String mode;
+    private long idToComplete;
 
 
     @Override
@@ -82,12 +98,17 @@ public class MainActivity extends AppCompatActivity implements InputDialog.Input
     @Override
     public void applyText(String tag)
     {
-        if(groupTag != null && !groupTag.isEmpty() && !tag.isEmpty())
+        if(mode.equals("edit"))
+        {
+            itemDAO.updateItemDesc(idToComplete, tag);
+            mode = "";
+        }
+        else if(groupTag != null && !groupTag.isEmpty() && !tag.isEmpty())
         {
             itemDAO.createTaskItem(groupTag, tag);
             groupTag = null;
         }
-        else if (!tag.isEmpty())
+        else if (!tag.isEmpty() && !mode.equals("edit") )
         {
             tagDao.createTag(tag);
         }
@@ -96,13 +117,13 @@ public class MainActivity extends AppCompatActivity implements InputDialog.Input
 
     private AlertDialog AskComplete(long id)
     {
-        final long idToComplete = id;
+        idToComplete = id;
 
         AlertDialog confirmationDialong =new AlertDialog.Builder(this)
-                .setTitle("Complete?")
-                .setMessage("Do you want to set this item as complete?")
+                .setTitle("Edit or Mark as Complete")
+                .setMessage("Do you want edit this item or mark as complete?")
                 .setIcon(R.drawable.check)
-                .setPositiveButton("Yes", new DialogInterface.OnClickListener()
+                .setPositiveButton("Mark as Complete", new DialogInterface.OnClickListener()
                 {
                     public void onClick(DialogInterface dialog, int whichButton)
                     {
@@ -111,7 +132,16 @@ public class MainActivity extends AppCompatActivity implements InputDialog.Input
                         fillData();
                     }
                 })
-                .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                .setNeutralButton("Edit", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i)
+                    {
+                        TaskItem item = itemDAO.getTaskItemById(idToComplete);
+                        mode = "edit";
+                        openDialog();
+                    }
+                })
+                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which)
                     {
 
@@ -123,9 +153,8 @@ public class MainActivity extends AppCompatActivity implements InputDialog.Input
         return confirmationDialong;
     }
 
-    private AlertDialog AskOption(long id, String type)
+    private AlertDialog AskOption(long id)
     {
-        final String deleteType = type;
         final long idToDelete = id;
 
         AlertDialog confirmationDialong =new AlertDialog.Builder(this)
@@ -136,20 +165,50 @@ public class MainActivity extends AppCompatActivity implements InputDialog.Input
                 {
                     public void onClick(DialogInterface dialog, int whichButton)
                     {
-                        if(deleteType == "Child")
-                        {
-                            itemDAO.deleteTaskItemById(idToDelete);
-                            fillData();
-                        }
-                        else if(deleteType == "Group")
-                        {
-                            tagDao.deleteTask(tagDao.getTaskTagById(idToDelete));
-                            fillData();
-                            add_fab.setVisibility(View.GONE);
-                        }
+                        tagDao.deleteTask(tagDao.getTaskTagById(idToDelete));
+                        fillData();
+                        add_fab.setVisibility(View.GONE);
                     }
                 })
-                .setNegativeButton("cancel", new DialogInterface.OnClickListener() {
+                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which)
+                    {
+
+                        dialog.dismiss();
+                    }
+                })
+                .create();
+
+        return confirmationDialong;
+    }
+
+    private AlertDialog AskArchive(long id)
+    {
+        final long idToEdit = id;
+
+        AlertDialog confirmationDialong =new AlertDialog.Builder(this)
+                .setTitle("Archive or Delete")
+                .setMessage("Do you want to Archive or Delete this time?")
+                .setIcon(R.drawable.archive)
+                .setPositiveButton("Delete", new DialogInterface.OnClickListener()
+                {
+                    public void onClick(DialogInterface dialog, int whichButton)
+                    {
+                            itemDAO.deleteTaskItemById(idToEdit);
+                            fillData();
+                    }
+                })
+                .setNeutralButton("Archive", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        TaskItem item = itemDAO.getTaskItemById(idToEdit);
+                        String completed = item.isCompleted() ? "Completed" : "Incomplete";
+                        postToTask(item.getTitle(), item.getDescription(), completed, "Hank", "1234", item.getDate());
+                        itemDAO.deleteTaskItem(item);
+                        fillData();
+                    }
+                })
+                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which)
                     {
 
@@ -187,15 +246,13 @@ public class MainActivity extends AppCompatActivity implements InputDialog.Input
                 if(ExpandableListView.getPackedPositionType(id) == ExpandableListView.PACKED_POSITION_TYPE_CHILD)
                 {
                     int childPos = ExpandableListView.getPackedPositionChild(id);
-                    AlertDialog diaBox = AskOption(childPos, "Child");
+                    AlertDialog diaBox = AskArchive(childPos);
                     diaBox.show();
-
-
                 }
                 else if(ExpandableListView.getPackedPositionType(id) == ExpandableListView.PACKED_POSITION_TYPE_GROUP)
                 {
                     int groupPos = ExpandableListView.getPackedPositionGroup(id);
-                    AlertDialog diaBox = AskOption(groupPos, "Group");
+                    AlertDialog diaBox = AskOption(groupPos);
                     diaBox.show();
                 }
                 return false;
@@ -285,6 +342,30 @@ public class MainActivity extends AppCompatActivity implements InputDialog.Input
             }
 
             return view;
+        }
+    }
+
+    public void postToTask(String title, String content, String completed, String alias, String password, String created_date)
+    {
+        try
+        {
+            HttpClient client = new DefaultHttpClient();
+            HttpPost request = new HttpPost("http://www.youcode.ca/Lab02Post.jsp");
+            List<NameValuePair> postParameters = new ArrayList<NameValuePair>();
+            postParameters.add(new BasicNameValuePair("LIST_TITLE", title));
+            postParameters.add(new BasicNameValuePair("CONTENT", content));
+            postParameters.add(new BasicNameValuePair("COMPLETED_FLAG", completed));
+            postParameters.add(new BasicNameValuePair("ALIAS", alias));
+            postParameters.add(new BasicNameValuePair("PASSWORD", password));
+            postParameters.add(new BasicNameValuePair("CREATED_DATE", created_date));
+            UrlEncodedFormEntity formEntity = new UrlEncodedFormEntity(postParameters);
+            request.setEntity(formEntity);
+            HttpResponse response = client.execute(request);
+
+        }
+        catch(Exception e)
+        {
+            Toast.makeText(this, "Error: " + e, Toast.LENGTH_LONG).show();
         }
     }
 

@@ -158,4 +158,12 @@ public class TaskItemDAO
         values.put(DBManager.completed, 1);
         db.update(DBManager.taskItem, values, "_id=" + id, null);
     }
+
+    public void updateItemDesc(long id, String desc)
+    {
+        ContentValues values = new ContentValues();
+        values.put(DBManager.description, desc);
+        db.update(DBManager.taskItem, values, "_id=" + id, null);
+    }
+
 }
