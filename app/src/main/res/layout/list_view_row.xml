@@ -12,7 +12,6 @@
         android:layout_height="fill_parent"
         android:layout_alignParentTop="true"
         android:textColor="#CCFFFF00"
-        android:textSize="@dimen/font_size"
         android:textStyle="bold" />
 
     <TextView
@@ -20,7 +19,6 @@
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
         android:textColor="#CCFFFF00"
-        android:textSize="@dimen/font_size"
         android:layout_below="@+id/list_title"
         android:gravity="end"
         />
@@ -30,7 +28,6 @@
         android:layout_width="wrap_content"
         android:layout_height="fill_parent"
         android:textColor="#CCFFFF00"
-        android:textSize="@dimen/font_size"
         android:textStyle="bold"
         android:layout_below="@+id/list_title"/>
 
@@ -39,7 +36,6 @@
         android:layout_width="wrap_content"
         android:layout_height="fill_parent"
         android:textColor="#CCFFFF00"
-        android:textSize="@dimen/font_size"
         android:layout_below="@+id/content"/>
 
 </RelativeLayout>

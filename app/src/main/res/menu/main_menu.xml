@@ -4,6 +4,9 @@
     <item android:id="@+id/home"
         android:title="Home"/>
 
+    <item android:id="@+id/pref"
+        android:title="Preference"/>
+
     <item android:id="@+id/toggle_service"
         android:title="Go Online"/>
 

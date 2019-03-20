@@ -1,3 +1,12 @@
 <resources>
     <string name="app_name">TaskList</string>
+    <string name="login_name">Login Name</string>
+    <string name="login_name_summary">Enter Login Name</string>
+    <string name="password">Password</string>
+    <string name="password_summary">Enter Password</string>
+    <string name="color">Color</string>
+    <string name="color_summary">Select Color from Color Picker</string>
+    <string name="font_size">Font Size</string>
+    <string name="font_size_summary">Font Size</string>
+
 </resources>

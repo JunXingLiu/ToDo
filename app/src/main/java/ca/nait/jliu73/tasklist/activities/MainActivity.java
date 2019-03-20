@@ -1,8 +1,9 @@
 package ca.nait.jliu73.tasklist.activities;
 
-import android.content.ContentValues;
+
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
@@ -10,18 +11,19 @@ import android.graphics.drawable.ColorDrawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.StrictMode;
+import android.preference.PreferenceManager;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ExpandableListView;
 import android.widget.SimpleCursorTreeAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
-
 
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
@@ -43,9 +45,7 @@ import ca.nait.jliu73.tasklist.InputDialog;
 import ca.nait.jliu73.tasklist.R;
 import ca.nait.jliu73.tasklist.models.TaskItem;
 
-import static android.R.id.message;
-
-public class MainActivity extends BaseActivity implements InputDialog.InputDialogListener
+public class MainActivity extends BaseActivity implements InputDialog.InputDialogListener, SharedPreferences.OnSharedPreferenceChangeListener
 {
     private FloatingActionButton fab;
     private DBManager manager;
@@ -56,15 +56,17 @@ public class MainActivity extends BaseActivity implements InputDialog.InputDialo
     private SQLiteDatabase db;
     private String groupTag = null;
     private ExpandableListAdapter adapter;
-    private View childView;
     private String mode = "";
     private long idToComplete;
+    View mainView;
+    SharedPreferences prefs;
+    String size;
+    float intSize;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
-
         super.onCreate(savedInstanceState);
         setContentView(R.layout.expandable_list);
         if(Build.VERSION.SDK_INT > 9)
@@ -93,6 +95,48 @@ public class MainActivity extends BaseActivity implements InputDialog.InputDialo
             }
         });
 
+
+        prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        prefs.registerOnSharedPreferenceChangeListener(this);
+
+        mainView = findViewById(R.id.main_screen);
+
+        int color = prefs.getInt("pref_color",0xffff0000);
+
+        size = prefs.getString("pref_font", "15");
+
+
+        mainView.setBackgroundColor(color);
+
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
+        {
+            ActionBar bar = this.getSupportActionBar();
+            bar.setBackgroundDrawable(new ColorDrawable(color));
+            Window window = getWindow();
+            window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+            window.setStatusBarColor(color);
+
+        }
+
+    }
+
+    @Override
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key)
+    {
+        int bgColor = prefs.getInt("pref_color", 0xffff0000);
+        mainView.setBackgroundColor(bgColor);
+
+        intSize = Float.parseFloat(size.substring(0,2));
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
+        {
+            ActionBar bar = this.getSupportActionBar();
+            bar.setBackgroundDrawable(new ColorDrawable(bgColor));
+            Window window = getWindow();
+            window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+            window.setStatusBarColor(bgColor);
+            TextView tv = (TextView)this.findViewById(R.id.tv_group);
+            tv.setTextSize(intSize);
+        }
 
     }
 
@@ -210,7 +254,7 @@ public class MainActivity extends BaseActivity implements InputDialog.InputDialo
                     public void onClick(DialogInterface dialogInterface, int i) {
                         TaskItem item = itemDAO.getTaskItemById(idToEdit);
                         String completed = item.isCompleted() ? "Completed" : "Incomplete";
-                        postToTask(item.getTitle(), item.getDescription(), completed, "Hank", "1234", item.getDate());
+                        postToTask(item.getTitle(), item.getDescription(), completed, item.getDate());
                         itemDAO.deleteTaskItem(item);
                         fillData();
                     }
@@ -352,8 +396,10 @@ public class MainActivity extends BaseActivity implements InputDialog.InputDialo
         }
     }
 
-    public void postToTask(String title, String content, String completed, String alias, String password, String created_date)
+    public void postToTask(String title, String content, String completed, String created_date)
     {
+        String alias = prefs.getString("pref_login_name", "Hank");
+        String password = prefs.getString("pref_password", "1234");
         try
         {
             HttpClient client = new DefaultHttpClient();
@@ -368,7 +414,6 @@ public class MainActivity extends BaseActivity implements InputDialog.InputDialo
             UrlEncodedFormEntity formEntity = new UrlEncodedFormEntity(postParameters);
             request.setEntity(formEntity);
             HttpResponse response = client.execute(request);
-
         }
         catch(Exception e)
         {

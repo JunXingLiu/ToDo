@@ -60,6 +60,11 @@ public class BaseActivity extends AppCompatActivity
                 startActivity(new Intent(this, MainActivity.class));
                 break;
             }
+            case R.id.pref:
+            {
+                startActivity(new Intent(this, Preference.class));
+                break;
+            }
         }
         return true;
     }

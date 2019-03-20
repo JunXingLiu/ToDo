@@ -13,7 +13,7 @@ import ca.nait.jliu73.tasklist.R;
  * Created by jliu73 on 3/20/2019.
  */
 
-public class ArchiveListActivity extends AppCompatActivity
+public class ArchiveListActivity extends BaseActivity
 {
     ListViewAdapater adapter;
     ListView listView;

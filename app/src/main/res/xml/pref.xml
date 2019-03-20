@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <EditTextPreference
+        android:key="pref_login_name"
+        android:title="@string/login_name"
+        android:summary="@string/login_name_summary"
+        />
+
+    <EditTextPreference
+        android:key="pref_password"
+        android:title="@string/password"
+        android:summary="@string/password_summary"
+        android:password="true"/>
+
+
+
+        <ListPreference
+            android:title="Pick Your Font Size"
+            android:key="pref_font"
+            android:defaultValue="15"
+            android:entries="@array/font_size"
+            android:entryValues="@array/font_value" />
+
+
+    <com.rarepebble.colorpicker.ColorPreference
+        android:key="pref_color"
+        android:title="@string/color"
+        android:summary="@string/color_summary"
+        android:defaultValue="#f00"
+        />
+
+</PreferenceScreen>
