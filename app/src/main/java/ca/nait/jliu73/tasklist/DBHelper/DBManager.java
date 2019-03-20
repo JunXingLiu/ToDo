@@ -16,7 +16,7 @@ public class DBManager extends SQLiteOpenHelper
 
     static final String TAG = "DBManager";
     static final String DB_Name = "task.db";
-    static final int DB_Version = 1;
+    static final int DB_Version = 3;
 
     public static final String taskItem = "TaskItem";
     public static final String id = BaseColumns._ID;
@@ -28,6 +28,13 @@ public class DBManager extends SQLiteOpenHelper
     public static final String taskTag = "TaskTag";
     public static final String headerId = BaseColumns._ID;
     public static final String headerTitle = "Title";
+
+    public static final String taskArchive = "TaskArchive";
+    public static final String archiveId = BaseColumns._ID;
+    public static final String post_date = "PostedDate";
+    public static final String listTitle = "List_Title";
+    public static final String contents = "Content";
+    public static final String completedFlag = "Completed_Flag";
 
     static final String Create_Header = "CREATE TABLE " + taskTag + "("
                                         + headerId + " INTEGER PRIMARY KEY AUTOINCREMENT, "
@@ -42,6 +49,13 @@ public class DBManager extends SQLiteOpenHelper
                                         + completed + " Integer "
                                         + ");";
 
+    static final String Detail_Archive = "Create Table " + taskArchive + "("
+            + archiveId + " Integer Primary Key AUTOINCREMENT, "
+            + post_date + " Text, "
+            + listTitle + " Text, "
+            + contents  + " Text, "
+            + completedFlag + " Text "
+            + ");";
 
 
     public DBManager(Context context)
@@ -56,7 +70,8 @@ public class DBManager extends SQLiteOpenHelper
 
         db.execSQL(Create_Header);
         db.execSQL(Create_Detail);
-        Log.d(TAG, "HERE");
+        db.execSQL(Detail_Archive);
+
     }
 
     @Override
@@ -64,6 +79,7 @@ public class DBManager extends SQLiteOpenHelper
     {
         db.execSQL("DROP TABLE IF EXISTS " + taskItem);
         db.execSQL("DROP TABLE IF EXISTS " + taskTag);
+        db.execSQL("DROP TABLE IF EXISTS " + taskArchive);
 
         onCreate(db);
     }

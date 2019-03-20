@@ -7,7 +7,9 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.StrictMode;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -43,7 +45,7 @@ import ca.nait.jliu73.tasklist.models.TaskItem;
 
 import static android.R.id.message;
 
-public class MainActivity extends AppCompatActivity implements InputDialog.InputDialogListener
+public class MainActivity extends BaseActivity implements InputDialog.InputDialogListener
 {
     private FloatingActionButton fab;
     private DBManager manager;
@@ -55,7 +57,7 @@ public class MainActivity extends AppCompatActivity implements InputDialog.Input
     private String groupTag = null;
     private ExpandableListAdapter adapter;
     private View childView;
-    private String mode;
+    private String mode = "";
     private long idToComplete;
 
 
@@ -65,6 +67,11 @@ public class MainActivity extends AppCompatActivity implements InputDialog.Input
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.expandable_list);
+        if(Build.VERSION.SDK_INT > 9)
+        {
+            StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+            StrictMode.setThreadPolicy(policy);
+        }
         manager = new DBManager(this);
         manager.getWritableDatabase();
         tagDao = new TaskTagDAO(this);
@@ -108,7 +115,7 @@ public class MainActivity extends AppCompatActivity implements InputDialog.Input
             itemDAO.createTaskItem(groupTag, tag);
             groupTag = null;
         }
-        else if (!tag.isEmpty() && !mode.equals("edit") )
+        else if (!tag.isEmpty())
         {
             tagDao.createTag(tag);
         }
